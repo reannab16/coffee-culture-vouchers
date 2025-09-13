@@ -2,9 +2,20 @@ export const runtime = "nodejs";
 
 import QRCode from "qrcode";
 
-export async function GET(_: Request, { params }: { params: { code: string } }) {
-  const base = process.env.NEXT_PUBLIC_BASE_URL!;
-  const url = `${base}/v/${params.code}`;
-  const png = await QRCode.toBuffer(url);
-  return new Response(png, { headers: { "Content-Type": "image/png" } });
+export async function GET(
+  req: Request,
+  context: { params: Promise<{ code: string }> }
+) {
+  const { code } = await context.params;
+  const base = process.env.NEXT_PUBLIC_BASE_URL ?? new URL(req.url).origin;
+  const url = `${base}/v/${code}`;
+
+  const svg = await QRCode.toString(url, { type: "svg" });
+
+  return new Response(svg, {
+    headers: {
+      "Content-Type": "image/svg+xml; charset=utf-8",
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  });
 }

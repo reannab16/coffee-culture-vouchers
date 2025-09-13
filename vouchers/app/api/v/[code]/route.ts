@@ -5,18 +5,26 @@ import { connectDB } from "@/lib/db";
 import Voucher, { VoucherDoc } from "@/models/Voucher";
 import Cafe, { CafeDoc } from "@/models/Cafe";
 
-export async function GET(_: NextRequest, { params }: { params: { code: string } }) {
+export async function GET(
+  _req: NextRequest,
+  context: { params: Promise<{ code: string }> }
+) {
+  const { code } = await context.params;
+
   await connectDB();
-  const v = await Voucher.findOne({ code: params.code }).lean<VoucherDoc>();
+  const v = await Voucher.findOne({ code }).lean<VoucherDoc>();
   if (!v) return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
 
   const cafe = await Cafe.findById(v.cafeId).lean<CafeDoc>();
 
-  return new Response(JSON.stringify({
-    code: v.code,
-    status: v.status,
-    offerName: v.offerName,
-    items: v.items,
-    cafe: { slug: cafe?.slug, name: cafe?.name },
-  }), { status: 200 });
+  return new Response(
+    JSON.stringify({
+      code: v.code,
+      status: v.status,
+      offerName: v.offerName,
+      items: v.items,
+      cafe: { slug: cafe?.slug, name: cafe?.name },
+    }),
+    { status: 200 }
+  );
 }

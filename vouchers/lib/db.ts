@@ -1,25 +1,28 @@
 import mongoose from "mongoose";
 
-let cached = (global as any)._mongoose as {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-};
-
-if (!cached) cached = (global as any)._mongoose = { conn: null, promise: null };
+declare global {
+  // eslint-disable-next-line no-var
+  var _mongoose:
+    | { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null }
+    | undefined;
+}
 
 export async function connectDB() {
-  // already connected (1) or connecting (2)
   if (mongoose.connection.readyState === 1) return mongoose;
-  if (cached.conn) return cached.conn;
 
-  if (!cached.promise) {
+  if (!global._mongoose) {
+    global._mongoose = { conn: null, promise: null };
+  }
+
+  if (global._mongoose.conn) return global._mongoose.conn;
+
+  if (!global._mongoose.promise) {
     const uri = process.env.MONGODB_URI;
     if (!uri) throw new Error("Missing MONGODB_URI");
     const dbName = process.env.MONGODB_DB || "vouchers";
-
-    cached.promise = mongoose.connect(uri, { dbName });
+    global._mongoose.promise = mongoose.connect(uri, { dbName });
   }
 
-  cached.conn = await cached.promise;
-  return cached.conn;
+  global._mongoose.conn = await global._mongoose.promise;
+  return global._mongoose.conn;
 }

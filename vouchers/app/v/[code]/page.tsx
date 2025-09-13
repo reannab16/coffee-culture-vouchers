@@ -1,21 +1,22 @@
+import Image from "next/image";
 import QRCode from "qrcode";
 import { connectDB } from "@/lib/db";
-import Voucher from "@/models/Voucher";
-import Cafe from "@/models/Cafe";
+import Voucher, { VoucherDoc } from "@/models/Voucher";
+import Cafe, { CafeDoc } from "@/models/Cafe";
 
-export const dynamic = "force-dynamic"; // no cache
+export const dynamic = "force-dynamic";
 
 async function getData(code: string) {
   await connectDB();
-  const v = await Voucher.findOne({ code }).lean();
+  const v = await Voucher.findOne({ code }).lean<VoucherDoc>();
   if (!v) return null;
-  const cafe = await Cafe.findById(v.cafeId).lean();
+  const cafe = await Cafe.findById(v.cafeId).lean<CafeDoc>();
   return {
     code,
-    status: v.status as string,
-    offerName: v.offerName as string,
-    items: (v.items as any[]),
-    cafeName: cafe?.name as string,
+    status: v.status,
+    offerName: v.offerName,
+    items: v.items,
+    cafeName: cafe?.name ?? "Café",
   };
 }
 
@@ -32,11 +33,11 @@ export default async function VoucherPage({ params }: { params: { code: string }
       <h1 className="text-xl font-semibold">{data.cafeName}</h1>
       <p className="text-lg">{data.offerName}</p>
       <ul className="list-disc pl-6">
-        {data.items.map((i:any) => (
-          <li key={i._id}>{i.name}: <b>{i.remaining}</b> left</li>
+        {data.items.map((i) => (
+          <li key={String(i._id)}>{i.name}: <b>{i.remaining}</b> left</li>
         ))}
       </ul>
-      <img src={dataUrl} alt="Voucher QR" className="w-48 h-48" />
+      <Image src={dataUrl} alt="Voucher QR" width={192} height={192} />
       <p className="text-sm text-gray-600">Show this QR at the till.</p>
     </div>
   );

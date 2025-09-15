@@ -147,7 +147,7 @@ export default function CafePage({
   );
 }
 
-function KasaCafeLogo({ className }: { className?: string }) {
+export function KasaCafeLogo({ className }: { className?: string }) {
   return (
     <svg
       version="1.0"
@@ -297,7 +297,7 @@ function KasaCafeLogo({ className }: { className?: string }) {
   );
 }
 
-function CCLogo({
+export function CCLogo({
   className,
   darkColour,
   lightColour,

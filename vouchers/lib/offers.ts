@@ -8,10 +8,10 @@ export type OfferConfig = {
 export const offersByCafe: Record<string, OfferConfig> = {
   "kasa-cafe": {
     name: "Kasa Café",
-    offerName: "Welcome Bundle",
+    offerName: "Freshers Freebies",
     included: [
-      { name: "Latte", number: 1 },
-      { name: "Brownie", number: 1 }
+      { name: "50% off Drink", number: 1 },
+      { name: "Cookie", number: 1 }
     ],
     pin: "8421"
   }

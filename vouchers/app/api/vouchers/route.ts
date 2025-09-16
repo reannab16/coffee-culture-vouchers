@@ -23,11 +23,17 @@ export async function POST(req: NextRequest) {
   const { cafeSlug, email } = Body.parse(json);
 
   const cfg = offersByCafe[cafeSlug];
-  if (!cfg) return new Response(JSON.stringify({ error: "Unknown cafe" }), { status: 404 });
+  if (!cfg)
+    return new Response(JSON.stringify({ error: "Unknown cafe" }), {
+      status: 404,
+    });
 
   // get or create cafe row (seeded already, but safe)
   const cafe = await Cafe.findOne({ slug: cafeSlug });
-  if (!cafe) return new Response(JSON.stringify({ error: "Cafe not found" }), { status: 404 });
+  if (!cafe)
+    return new Response(JSON.stringify({ error: "Cafe not found" }), {
+      status: 404,
+    });
 
   // rate-limit: 1 voucher per email per cafe per 24h (simple check)
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -38,10 +44,13 @@ export async function POST(req: NextRequest) {
 
   if (existing?.guestId) {
     const origin = process.env.NEXT_PUBLIC_BASE_URL ?? new URL(req.url).origin;
-    return new Response(JSON.stringify({
-      message: "Already claimed in last 24h",
-      viewUrl: `${origin}/v/${existing.code}`
-    }), { status: 200 });
+    return new Response(
+      JSON.stringify({
+        message: "Already claimed in last 24h",
+        viewUrl: `${origin}/v/${existing.code}`,
+      }),
+      { status: 200 }
+    );
   }
 
   const guest = await Guest.findOneAndUpdate(
@@ -56,7 +65,10 @@ export async function POST(req: NextRequest) {
     code = shortCode(8);
   }
 
-  const items = cfg.included.map(i => ({ name: i.name, remaining: i.number }));
+  const items = cfg.included.map((i) => ({
+    name: i.name,
+    remaining: i.number,
+  }));
 
   const voucher = await Voucher.create({
     code,
@@ -71,14 +83,19 @@ export async function POST(req: NextRequest) {
   const viewUrl = `${origin}/v/${voucher.code}`;
 
   try {
-  if (process.env.RESEND_API_KEY) {
-    const { Resend } = await import("resend");
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    if (process.env.RESEND_API_KEY) {
+      const { Resend } = await import("resend");
+      const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // Tip: test first with onboarding@resend.dev as the sender
-    const from = process.env.RESEND_FROM ?? "info@coffee-culture.uk";
+      // Tip: test first with onboarding@resend.dev as the sender
+      const from = process.env.RESEND_FROM ?? "info@coffee-culture.uk";
 
-    const html = (viewUrl: string, code: string, offerName: string, origin: string) => `
+      const html = (
+        viewUrl: string,
+        code: string,
+        offerName: string,
+        origin: string
+      ) => `
   <!-- Preheader (hidden preview text) -->
   <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0;">
     Your ${offerName} voucher is ready. Show the QR at the till.
@@ -91,7 +108,7 @@ export async function POST(req: NextRequest) {
           <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="width:600px;max-width:100%;background:#ffffff;border-radius:12px;border:1px solid #eaeaea;">
             <tr>
               <td style="padding:24px 28px;text-align:center;">
-                <img src="${origin}/kasalogo.svg" alt="Kasa Café" width="40" height="40" style="display:inline-block;">
+                <img src="https://raw.githubusercontent.com/reannab16/coffee-culture-vouchers/refs/heads/main/vouchers/public/kasalogo1.webp" alt="Kasa Café" width="40" height="40" style="display:inline-block;">
                 <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:20px;font-weight:600;margin-top:12px;color:#111">
                   Your voucher is ready
                 </div>
@@ -111,18 +128,6 @@ export async function POST(req: NextRequest) {
                   </tr>
                 </table>
 
-                <!-- QR -->
-                <div style="margin-top:20px;">
-                  <img src="${origin}/api/qr/${code}" alt="Voucher QR" width="192" height="192"
-                       style="display:block;margin:0 auto;border:1px solid #eee;border-radius:8px;">
-                </div>
-
-                <!-- Fallback link -->
-                <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#666;font-size:12px;margin-top:14px;">
-                  If the button doesn’t work, copy and paste this link:<br>
-                  <a href="${viewUrl}" style="color:#0a7cff;text-decoration:underline;word-break:break-all;">${viewUrl}</a>
-                </div>
-
                 <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
                 <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#888;font-size:11px;line-height:1.4;">
                   Show this QR at the till. This voucher is single-use and tied to your email.
@@ -140,22 +145,24 @@ export async function POST(req: NextRequest) {
   </div>
 `;
 
-    const result = await resend.emails.send({
-      from,
-      to: email,
-      subject: "Your Voucher from Kasa Café x Coffee Culture",
-      html: html(viewUrl, voucher.code, cfg.offerName, origin),
-    });
+      const result = await resend.emails.send({
+        from,
+        to: email,
+        subject: "Your Voucher from Kasa Café x Coffee Culture",
+        html: html(viewUrl, voucher.code, cfg.offerName, origin),
+      });
 
-    if (result.error) {
-      console.error("Resend send error:", result.error);
+      if (result.error) {
+        console.error("Resend send error:", result.error);
+      }
+    } else {
+      console.warn("RESEND_API_KEY not set; skipping email send");
     }
-  } else {
-    console.warn("RESEND_API_KEY not set; skipping email send");
+  } catch (e) {
+    console.error("Resend exception:", e);
   }
-} catch (e) {
-  console.error("Resend exception:", e);
-}
 
-  return new Response(JSON.stringify({ code: voucher.code, viewUrl }), { status: 200 });
+  return new Response(JSON.stringify({ code: voucher.code, viewUrl }), {
+    status: 200,
+  });
 }

@@ -2,6 +2,7 @@ import { offersByCafe } from "@/lib/offers";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { Icon } from "@iconify/react/dist/iconify.js";
+import SubmitButton from "@/components/SubmitButton";
 
 import { Lora } from "next/font/google";
 
@@ -19,8 +20,10 @@ export default function CafePage({
   params: { cafeSlug: string };
   searchParams: { error?: string };
 }) {
+    
   const cfg = offersByCafe[params.cafeSlug];
   if (!cfg) return <div className="p-6">Unknown café.</div>;
+  
 
   async function claim(formData: FormData) {
     "use server";
@@ -130,6 +133,7 @@ export default function CafePage({
         )}
 
         <form action={claim}>
+            
           <label className="block mb-2">Email</label>
           <input
             name="email"
@@ -138,9 +142,9 @@ export default function CafePage({
             className="border p-2 w-full rounded"
             placeholder="you@email.com"
           />
-          <button className="mt-3 bg-foreground text-white px-4 py-2 rounded">
+          <SubmitButton>
             Get voucher
-          </button>
+          </SubmitButton>
         </form>
       </div>
     </div>

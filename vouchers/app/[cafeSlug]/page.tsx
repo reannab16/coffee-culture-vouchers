@@ -20,10 +20,8 @@ export default function CafePage({
   params: { cafeSlug: string };
   searchParams: { error?: string };
 }) {
-    
   const cfg = offersByCafe[params.cafeSlug];
   if (!cfg) return <div className="p-6">Unknown café.</div>;
-  
 
   async function claim(formData: FormData) {
     "use server";
@@ -132,9 +130,63 @@ export default function CafePage({
           </p>
         )}
 
+        <div className="mt-6 space-y-3 w-full max-w-80 mb-6">
+          <p className="text-sm text-foreground/80">Follow us on insta:</p>
+
+          <a
+            href="https://instagram.com/kasacafelondon"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open @kasacafelondon on Instagram"
+            className="group flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 shadow-sm transition hover:bg-gray-50 hover:shadow-md active:scale-[.99]"
+          >
+            <span className="flex items-center gap-3">
+              {/* Instagram glyph (monochrome) */}
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5 text-foreground"
+                aria-hidden
+              >
+                <path
+                  fill="currentColor"
+                  d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm10 2H7a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3zm-5 3a5 5 0 110 10 5 5 0 010-10zm0 2.2a2.8 2.8 0 100 5.6 2.8 2.8 0 000-5.6zM18.6 6.4a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"
+                />
+              </svg>
+              <span className="font-medium text-foreground">@kasacafelondon</span>
+            </span>
+            <span className="text-xs text-foreground/50 group-hover:text-foreground/70">
+              Open
+            </span>
+          </a>
+
+          <a
+            href="https://instagram.com/coffeeculture_uk"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open @coffeeculture_uk on Instagram"
+            className="group flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 shadow-sm transition hover:bg-gray-50 hover:shadow-md active:scale-[.99]"
+          >
+            <span className="flex items-center gap-3">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5 text-foreground"
+                aria-hidden
+              >
+                <path
+                  fill="currentColor"
+                  d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm10 2H7a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3zm-5 3a5 5 0 110 10 5 5 0 010-10zm0 2.2a2.8 2.8 0 100 5.6 2.8 2.8 0 000-5.6zM18.6 6.4a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z"
+                />
+              </svg>
+              <span className="font-medium text-foreground">@coffeeculture_uk</span>
+            </span>
+            <span className="text-xs text-foreground/50 group-hover:text-foreground/70">
+              Open
+            </span>
+          </a>
+        </div>
+
         <form action={claim}>
-            
-          <label className="block mb-2">Email</label>
+          <label className="block mb-2 text-sm">Email</label>
           <input
             name="email"
             type="email"
@@ -142,9 +194,7 @@ export default function CafePage({
             className="border p-2 w-full rounded"
             placeholder="you@email.com"
           />
-          <SubmitButton>
-            Get voucher
-          </SubmitButton>
+          <SubmitButton>Get voucher</SubmitButton>
         </form>
       </div>
     </div>

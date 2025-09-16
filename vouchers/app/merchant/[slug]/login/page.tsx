@@ -22,13 +22,13 @@ export default function Login({ params }: { params: { slug: string } }) {
   }
 
   return (
-    <div className="max-w-sm mx-auto p-6 space-y-4">
+    <div className="max-w-sm mx-auto p-6 space-y-4 bg-[var(--foreground)] text-white">
       <h1 className="text-xl font-semibold">Staff Login ({params.slug})</h1>
       <form onSubmit={onSubmit}>
         <input
           value={pin} onChange={(e)=>setPin(e.target.value)}
           placeholder="Enter PIN" className="border p-2 w-full rounded" />
-        <button className="mt-3 bg-black text-white px-4 py-2 rounded">Login</button>
+        <button className="mt-3 bg-white text-[var(--foreground)] px-4 py-2 rounded">Login</button>
       </form>
       {msg && <p className="text-red-600">{msg}</p>}
     </div>

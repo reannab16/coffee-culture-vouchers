@@ -36,7 +36,8 @@ export default async function VoucherPage({
 }: {
   params: { code: string };
 }) {
-  const data = await getData(params.code);
+  const { code } = await params;
+  const data = await getData(code);
   if (!data) return <div className="p-6">Voucher not found.</div>;
 
   const base = process.env.NEXT_PUBLIC_BASE_URL!;
